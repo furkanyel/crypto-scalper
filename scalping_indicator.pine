@@ -113,6 +113,7 @@ if buySignal
     buyTP2 := close * (1 + takeProfit2Percent / 100)
     buyTP3 := close * (1 + takeProfit3Percent / 100)
     buyBarIndex := bar_index
+    alert("🟢 LONG SİNYALİ\n📈 Giriş Fiyatı: " + str.tostring(close, format.mintick) + "\n🛑 Stop Loss: " + str.tostring(buyStopLoss, format.mintick) + "\n🎯 TP1: " + str.tostring(buyTP1, format.mintick) + "\n🎯 TP2: " + str.tostring(buyTP2, format.mintick) + "\n🎯 TP3: " + str.tostring(buyTP3, format.mintick), alert.freq_once_per_bar_close)
 
 // Calculate levels on sell signal
 if sellSignal
@@ -122,6 +123,7 @@ if sellSignal
     sellTP2 := close * (1 - takeProfit2Percent / 100)
     sellTP3 := close * (1 - takeProfit3Percent / 100)
     sellBarIndex := bar_index
+    alert("🔴 SHORT SİNYALİ\n📉 Giriş Fiyatı: " + str.tostring(close, format.mintick) + "\n🛑 Stop Loss: " + str.tostring(sellStopLoss, format.mintick) + "\n🎯 TP1: " + str.tostring(sellTP1, format.mintick) + "\n🎯 TP2: " + str.tostring(sellTP2, format.mintick) + "\n🎯 TP3: " + str.tostring(sellTP3, format.mintick), alert.freq_once_per_bar_close)
 
 // Calculate Risk/Reward Ratios
 buyRR1 = not na(buyEntryPrice) and not na(buyStopLoss) ? (buyTP1 - buyEntryPrice) / (buyEntryPrice - buyStopLoss) : na
@@ -196,12 +198,10 @@ bgcolor(bgColor, title="Signal Background")
 
 // Alert Conditions with Price Levels
 alertcondition(buySignal, title="Buy Signal Alert", 
- message="🟢 LONG SİNYALİ\n📈 Giriş Fiyatı: {{close}}\n🛑 Stop Loss: " + str.tostring(buyStopLoss) + 
- "\n🎯 TP1: " + str.tostring(buyTP1) + "\n🎯 TP2: " + str.tostring(buyTP2) + "\n🎯 TP3: " + str.tostring(buyTP3))
+ message="🟢 LONG SİNYALİ - Detaylar için grafiği kontrol edin!")
 
 alertcondition(sellSignal, title="Sell Signal Alert",
- message="🔴 SHORT SİNYALİ\n📉 Giriş Fiyatı: {{close}}\n🛑 Stop Loss: " + str.tostring(sellStopLoss) + 
- "\n🎯 TP1: " + str.tostring(sellTP1) + "\n🎯 TP2: " + str.tostring(sellTP2) + "\n🎯 TP3: " + str.tostring(sellTP3))
+ message="🔴 SHORT SİNYALİ - Detaylar için grafiği kontrol edin!")
 
 alertcondition(buySignal or sellSignal, title="Any Signal Alert", message="⚠️ TİCARET SİNYALİ - Grafik kontrol edin!")
 
