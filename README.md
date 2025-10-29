@@ -2,15 +2,42 @@
 
 A comprehensive Pine Script v5 indicator designed for cryptocurrency scalping on 5-minute timeframes. This indicator uses a multi-indicator confirmation system to generate high-probability buy and sell signals.
 
-## 🎯 Features
+> **⚡ Want to start immediately? Check [QUICK_START.md](QUICK_START.md) for 5-minute setup guide!**
+> 
+> **🇹🇷 Türkçe dökümantasyon için [README_TR.md](README_TR.md) dosyasına bakın.**
+
+## 🎯 NEW Features
+
+### ✅ Entry & Exit Price Levels
+- **Exact Entry Price**: Automatically calculated entry price for each signal
+- **Stop Loss Levels**: Automatic SL calculation with risk management
+- **3 Take Profit Targets**: TP1, TP2, TP3 for gradual profit taking
+- **Risk/Reward Ratios**: Automatic RR calculation for each level
+- **Visual Price Labels**: All price levels clearly visible on chart with detailed information
+
+### ✅ Backtesting Capability
+- **Separate Strategy File**: `scalping_strategy.pine` for full backtesting support
+- **Performance Metrics**: Win rate, profit factor, and detailed statistics
+- **Date Range Filter**: Backtest specific time periods
+- **Commission & Slippage**: Included for realistic backtesting results
+- **Performance Table**: Live statistics displayed on chart
+
+## 📁 Files
+
+1. **scalping_indicator.pine** - Main indicator (signals with price levels and recommendations)
+2. **scalping_strategy.pine** - Backtest strategy (for performance analysis and testing)
+3. **README_TR.md** - Turkish documentation
+
+## 🎯 Core Features
 
 - **Multi-Indicator Confirmation System**: Combines RSI, EMA crossovers, Bollinger Bands, and Volume analysis
 - **No Repainting**: Uses confirmed close values to ensure signals don't repaint
 - **Fully Customizable**: All parameters can be adjusted via input settings
-- **Visual Signals**: Clear buy/sell arrows displayed on chart
-- **Alert System**: Built-in alert conditions for automated notifications
+- **Visual Signals**: Clear buy/sell arrows displayed on chart with price recommendations
+- **Alert System**: Built-in alert conditions with entry/exit prices
 - **Information Dashboard**: Real-time indicator values displayed in a clean table
 - **Flexible Display**: Toggle indicators on/off and customize colors
+- **Risk Management**: Built-in stop loss and take profit calculations
 
 ## 📊 Strategy Components
 
@@ -41,34 +68,73 @@ A comprehensive Pine Script v5 indicator designed for cryptocurrency scalping on
 
 ## 🚀 Installation Instructions
 
-### Step 1: Copy the Code
+### Option 1: Indicator (For Signals & Price Recommendations)
+
+**Step 1: Copy the Code**
 1. Open the `scalping_indicator.pine` file
 2. Copy the entire content (Ctrl+A, Ctrl+C)
 
-### Step 2: Add to TradingView
+**Step 2: Add to TradingView**
 1. Go to [TradingView](https://www.tradingview.com/)
-2. Open any chart
+2. Open any chart (recommended: BTC/USDT 5-minute chart)
 3. Click on "Pine Editor" at the bottom of the screen
 4. Paste the code into the editor
 5. Click "Add to Chart" at the top of the Pine Editor
 
-### Step 3: Configure Settings
+**Step 3: Configure Settings**
 1. Click the gear icon ⚙️ next to the indicator name on the chart
-2. Adjust parameters as needed (see Parameter Settings Guide below)
+2. Adjust parameters as needed:
+   - **Risk Management**: Set Stop Loss % and Take Profit levels
+   - **Display Settings**: Toggle price labels on/off
+   - Customize colors and other parameters
 3. Click "OK" to apply changes
 
-### Step 4: Set Up Alerts (Optional)
+### Option 2: Strategy (For Backtesting)
+
+**Step 1: Copy the Strategy Code**
+1. Open the `scalping_strategy.pine` file
+2. Copy the entire content
+
+**Step 2: Add to TradingView**
+1. In TradingView Pine Editor, create a new script
+2. Paste the strategy code
+3. Click "Add to Chart"
+
+**Step 3: View Backtest Results**
+1. Look at the "Strategy Tester" tab at the bottom of the screen
+2. View detailed performance metrics:
+   - **Overview**: Total profit/loss, win rate
+   - **Performance Summary**: Detailed statistics
+   - **List of Trades**: All executed trades
+3. Adjust date range in settings if needed
+
+**Step 4: Optimize Parameters**
+1. Click settings ⚙️ on the strategy
+2. Adjust parameters and see how results change
+3. Find optimal settings for your trading style
+
+### Step 5: Set Up Alerts (Indicator Only)
 1. Right-click on the chart
 2. Select "Add Alert"
 3. Choose the indicator from the "Condition" dropdown
 4. Select your preferred alert type:
-   - "Buy Signal Alert" - Only buy signals
-   - "Sell Signal Alert" - Only sell signals
-   - "Any Signal Alert" - Both buy and sell signals
-5. Configure notification preferences (popup, email, webhook, etc.)
+   - **"Buy Signal Alert"** - Only long signals with entry/exit prices
+   - **"Sell Signal Alert"** - Only short signals with entry/exit prices
+   - **"Any Signal Alert"** - Both buy and sell signals
+5. Configure notification preferences (popup, email, mobile, webhook, etc.)
 6. Click "Create"
 
-## 📈 Signal Conditions
+**Alert Message Example:**
+```
+🟢 LONG SIGNAL
+📈 Entry Price: 50000
+🛑 Stop Loss: 49000
+🎯 TP1: 51000
+🎯 TP2: 52000
+🎯 TP3: 53000
+```
+
+## 📈 Signal Conditions & Price Levels
 
 ### Buy Signal (Green Arrow Below Candle) ▲
 All of the following conditions must be met simultaneously:
@@ -77,7 +143,25 @@ All of the following conditions must be met simultaneously:
 3. ✅ Price touches or breaks below lower Bollinger Band (potential reversal)
 4. ✅ Volume is above the volume moving average (strong momentum)
 
-**Interpretation**: This combination suggests a strong oversold condition with bullish momentum building, indicating a potential entry point for a long position.
+**When Signal Appears:**
+- Green arrow with "BUY" text appears below the candle
+- A detailed label shows:
+  - 💰 **Entry Price**: Current close price (where to enter)
+  - 🛑 **Stop Loss**: Calculated SL level (default 2% below entry)
+  - 🎯 **TP1**: First target (default 2% above entry) with RR ratio
+  - 🎯 **TP2**: Second target (default 4% above entry) with RR ratio
+  - 🎯 **TP3**: Third target (default 6% above entry) with RR ratio
+- Horizontal lines show all price levels on the chart
+
+**Example:**
+```
+📊 LONG
+💰 Entry: $50,000
+🛑 SL: $49,000 (Risk: $1,000)
+🎯 TP1: $51,000 (RR: 1:1) - Take 50% profit
+🎯 TP2: $52,000 (RR: 1:2) - Take 30% profit
+🎯 TP3: $53,000 (RR: 1:3) - Take 20% profit
+```
 
 ### Sell Signal (Red Arrow Above Candle) ▼
 All of the following conditions must be met simultaneously:
@@ -86,7 +170,25 @@ All of the following conditions must be met simultaneously:
 3. ✅ Price touches or breaks above upper Bollinger Band (potential reversal)
 4. ✅ Volume is above the volume moving average (strong momentum)
 
-**Interpretation**: This combination suggests a strong overbought condition with bearish momentum building, indicating a potential entry point for a short position or exit from a long position.
+**When Signal Appears:**
+- Red arrow with "SELL" text appears above the candle
+- A detailed label shows:
+  - 💰 **Entry Price**: Current close price (where to enter short)
+  - 🛑 **Stop Loss**: Calculated SL level (default 2% above entry)
+  - 🎯 **TP1**: First target (default 2% below entry) with RR ratio
+  - 🎯 **TP2**: Second target (default 4% below entry) with RR ratio
+  - 🎯 **TP3**: Third target (default 6% below entry) with RR ratio
+- Horizontal lines show all price levels on the chart
+
+**Example:**
+```
+📊 SHORT
+💰 Entry: $50,000
+🛑 SL: $51,000 (Risk: $1,000)
+🎯 TP1: $49,000 (RR: 1:1) - Take 50% profit
+🎯 TP2: $48,000 (RR: 1:2) - Take 30% profit
+🎯 TP3: $47,000 (RR: 1:3) - Take 20% profit
+```
 
 ## ⚙️ Parameter Settings Guide
 
@@ -106,10 +208,26 @@ All of the following conditions must be met simultaneously:
 ### Volume Settings
 - **Volume MA Period**: Default 20. Matches the BB period for consistency.
 
+### Risk Management Settings (NEW!)
+- **Show Stop Loss & Take Profit Levels**: Toggle price level lines on/off
+- **Stop Loss %**: Default 2.0%. Adjust based on volatility (1-5% range)
+  - Lower % = Tighter stop, more frequent stops
+  - Higher % = Wider stop, fewer stops but bigger risk
+- **Take Profit 1 %**: Default 2.0%. First profit target (recommended: same as SL for 1:1 RR)
+- **Take Profit 2 %**: Default 4.0%. Second profit target (recommended: 2x SL for 1:2 RR)
+- **Take Profit 3 %**: Default 6.0%. Third profit target (recommended: 3x SL for 1:3 RR)
+- **Show Price Level Labels**: Toggle detailed entry/exit labels on/off
+
+**Recommended Settings for Different Assets:**
+- **BTC/ETH**: SL 1.5-2%, TP 2-4-6%
+- **High Volatility Altcoins**: SL 3-5%, TP 5-10-15%
+- **Stable Assets**: SL 1%, TP 1-2-3%
+
 ### Display Settings
 - **Show EMAs**: Toggle EMA display on/off
 - **Show Bollinger Bands**: Toggle BB display on/off
 - **Show Background Color**: Enable/disable background highlighting on signals
+- **Show Trade Info Panel**: Toggle the information table display
 
 ### Color Settings
 Customize all colors to match your chart theme and preferences.
@@ -186,26 +304,104 @@ Position Size = $100 / $500 = 0.002 BTC (or equivalent)
 - **Correlation**: Avoid multiple correlated pairs (e.g., don't trade BTC/USDT and BTC/EUR simultaneously)
 - **Capital Allocation**: Don't use more than 10-15% of capital on scalping
 
-## 📝 Backtesting Notes
+## 📝 Backtesting Guide
 
-### Recommended Testing Approach
-1. **Historical Data**: Test on at least 3-6 months of historical data
-2. **Different Market Conditions**: Include bull, bear, and sideways markets
-3. **Multiple Assets**: Test on various cryptocurrency pairs
-4. **Paper Trading**: Practice with paper trading before using real money
+### How to Backtest (Using Strategy File)
+
+**Step 1: Load the Strategy**
+1. Copy `scalping_strategy.pine` code
+2. Add to TradingView chart (5-minute timeframe recommended)
+3. The strategy will automatically execute trades based on signals
+
+**Step 2: Configure Backtest Settings**
+1. Click settings ⚙️ on the strategy
+2. Under "Backtest Settings":
+   - Enable "Use Date Filter"
+   - Set **Start Date** and **End Date** for your test period
+3. Adjust Risk Management settings:
+   - Stop Loss % (test different values: 1%, 2%, 3%)
+   - Take Profit levels
+   - Enable/disable Trailing Stop
+
+**Step 3: View Results**
+Go to "Strategy Tester" tab at bottom of TradingView:
+
+**Overview Tab:**
+- **Net Profit**: Total profit/loss in $
+- **Total Closed Trades**: Number of completed trades
+- **Percent Profitable**: Win rate %
+- **Profit Factor**: Gross profit ÷ Gross loss
+- **Max Drawdown**: Largest capital decline
+
+**Performance Summary Tab:**
+- Detailed statistics
+- Average trade duration
+- Average win vs average loss
+- Largest winning/losing trade
+
+**List of Trades Tab:**
+- Every single trade executed
+- Entry/exit prices
+- Profit/loss per trade
+- Trade duration
+
+### On-Chart Performance Table
+
+The strategy displays a live performance table showing:
+- **Toplam İşlem** (Total Trades)
+- **Kazanan İşlem** (Winning Trades)
+- **Kaybeden İşlem** (Losing Trades)
+- **Kazanma Oranı** (Win Rate %)
+- **Kar Faktörü** (Profit Factor)
+- **Ort. Kazanç** (Average Win)
+- **Ort. Kayıp** (Average Loss)
 
 ### Key Metrics to Track
-- **Win Rate**: Percentage of profitable trades (aim for >50%)
-- **Average Risk/Reward**: Should be at least 1:2
-- **Maximum Drawdown**: Largest peak-to-trough decline
-- **Profit Factor**: Gross profit / Gross loss (aim for >1.5)
-- **Expectancy**: (Win% × Avg Win) - (Loss% × Avg Loss) (should be positive)
+
+✅ **Good Backtest Results:**
+- Win Rate: **> 50%**
+- Profit Factor: **> 1.5**
+- Max Drawdown: **< 20%**
+- Average Win > Average Loss
+- Consistent profit across different time periods
+
+❌ **Poor Backtest Results:**
+- Win Rate: < 40%
+- Profit Factor: < 1.0
+- Max Drawdown: > 30%
+- Average Win < Average Loss
+- Inconsistent or declining equity curve
+
+### Optimization Tips
+
+**Test Different Scenarios:**
+1. **Different Stop Loss %**: Try 1%, 2%, 3%, 5%
+2. **Different Take Profit Levels**: Adjust TP1, TP2, TP3
+3. **Different Time Periods**: Bull market vs bear market
+4. **Different Assets**: BTC, ETH, altcoins
+5. **Different Timeframes**: Test on 3m, 5m, 15m
+
+**Parameter Optimization:**
+- Use TradingView's built-in optimization feature
+- Test RSI periods: 10, 12, 14, 16
+- Test EMA periods: 5/13, 9/21, 12/26
+- Find the best combination for your asset
+
+### Recommended Testing Approach
+1. **Historical Data**: Test on at least 6-12 months of data
+2. **Different Market Conditions**: Include bull, bear, and sideways markets
+3. **Multiple Assets**: Test on various cryptocurrency pairs
+4. **Walk-Forward Testing**: Test on past data, then validate on recent unseen data
+5. **Paper Trading**: After good backtest, practice with paper trading for 2-4 weeks
+6. **Small Live Positions**: Start with minimal position sizes
 
 ### Known Limitations
 - **Choppy Markets**: May generate false signals in ranging, low-volatility conditions
 - **News Events**: Major news can cause whipsaws - avoid trading during high-impact news
 - **Gaps**: Crypto markets are 24/7, but exchange outages can cause gaps
-- **Slippage**: Fast-moving markets may result in slippage on entry/exit
+- **Slippage**: Fast-moving markets may result in slippage (strategy includes 2 ticks slippage)
+- **Commission**: Strategy includes 0.1% commission per trade (adjust if needed)
+- **Over-optimization**: Don't over-optimize to past data - it may not work in future
 
 ## 🔧 Troubleshooting
 
