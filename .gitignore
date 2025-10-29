@@ -1,0 +1,46 @@
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Backup Files
+*.bak
+*.backup
+*.tmp
+*~
+
+# Log Files
+*.log
+
+# TradingView specific
+*.tv
+
+# Node modules (if any tooling is added later)
+node_modules/
+
+# Python (if any testing scripts are added)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+ENV/
+
+# Other
+.cache/
+*.pid
