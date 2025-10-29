@@ -21,10 +21,19 @@ bbStdDev = input.float(2.0, "Bollinger Bands Std Dev", minval=0.1, step=0.1, gro
 // Volume Settings
 volumeMaLength = input.int(20, "Volume MA Period", minval=1, group="Volume Settings")
 
+// Risk Management Settings
+showRiskLevels = input.bool(true, "Show Stop Loss & Take Profit Levels", group="Risk Management")
+stopLossPercent = input.float(2.0, "Stop Loss %", minval=0.1, maxval=10, step=0.1, group="Risk Management")
+takeProfit1Percent = input.float(2.0, "Take Profit 1 %", minval=0.1, maxval=20, step=0.1, group="Risk Management")
+takeProfit2Percent = input.float(4.0, "Take Profit 2 %", minval=0.1, maxval=30, step=0.1, group="Risk Management")
+takeProfit3Percent = input.float(6.0, "Take Profit 3 %", minval=0.1, maxval=50, step=0.1, group="Risk Management")
+showPriceLevels = input.bool(true, "Show Price Level Labels", group="Risk Management")
+
 // Display Settings
 showEMAs = input.bool(true, "Show EMAs", group="Display Settings")
 showBollingerBands = input.bool(true, "Show Bollinger Bands", group="Display Settings")
 showBackgroundColor = input.bool(false, "Show Background Color on Signals", group="Display Settings")
+showTradeInfo = input.bool(true, "Show Trade Info Panel", group="Display Settings")
 
 // Color Settings
 emaFastColor = input.color(color.new(color.blue, 0), "Fast EMA Color", group="Color Settings")
@@ -53,6 +62,9 @@ emaSlow = ta.ema(close, emaSlowLength)
 volumeMa = ta.sma(volume, volumeMaLength)
 volumeAboveAverage = volume > volumeMa
 
+// ATR for dynamic stop loss (alternative)
+atrValue = ta.atr(14)
+
 // ================================================================================
 // SIGNAL CONDITIONS
 // ================================================================================
@@ -76,6 +88,51 @@ buySignal = rsiCrossAboveOversold and emaBullishCross and priceTouchLowerBB and 
 sellSignal = rsiCrossBelowOverbought and emaBearishCross and priceTouchUpperBB and volumeAboveAverage
 
 // ================================================================================
+// RISK MANAGEMENT CALCULATIONS
+// ================================================================================
+
+var float buyEntryPrice = na
+var float buyStopLoss = na
+var float buyTP1 = na
+var float buyTP2 = na
+var float buyTP3 = na
+var int buyBarIndex = na
+
+var float sellEntryPrice = na
+var float sellStopLoss = na
+var float sellTP1 = na
+var float sellTP2 = na
+var float sellTP3 = na
+var int sellBarIndex = na
+
+// Calculate levels on buy signal
+if buySignal
+    buyEntryPrice := close
+    buyStopLoss := close * (1 - stopLossPercent / 100)
+    buyTP1 := close * (1 + takeProfit1Percent / 100)
+    buyTP2 := close * (1 + takeProfit2Percent / 100)
+    buyTP3 := close * (1 + takeProfit3Percent / 100)
+    buyBarIndex := bar_index
+
+// Calculate levels on sell signal
+if sellSignal
+    sellEntryPrice := close
+    sellStopLoss := close * (1 + stopLossPercent / 100)
+    sellTP1 := close * (1 - takeProfit1Percent / 100)
+    sellTP2 := close * (1 - takeProfit2Percent / 100)
+    sellTP3 := close * (1 - takeProfit3Percent / 100)
+    sellBarIndex := bar_index
+
+// Calculate Risk/Reward Ratios
+buyRR1 = not na(buyEntryPrice) and not na(buyStopLoss) ? (buyTP1 - buyEntryPrice) / (buyEntryPrice - buyStopLoss) : na
+buyRR2 = not na(buyEntryPrice) and not na(buyStopLoss) ? (buyTP2 - buyEntryPrice) / (buyEntryPrice - buyStopLoss) : na
+buyRR3 = not na(buyEntryPrice) and not na(buyStopLoss) ? (buyTP3 - buyEntryPrice) / (buyEntryPrice - buyStopLoss) : na
+
+sellRR1 = not na(sellEntryPrice) and not na(sellStopLoss) ? (sellEntryPrice - sellTP1) / (sellStopLoss - sellEntryPrice) : na
+sellRR2 = not na(sellEntryPrice) and not na(sellStopLoss) ? (sellEntryPrice - sellTP2) / (sellStopLoss - sellEntryPrice) : na
+sellRR3 = not na(sellEntryPrice) and not na(sellStopLoss) ? (sellEntryPrice - sellTP3) / (sellStopLoss - sellEntryPrice) : na
+
+// ================================================================================
 // PLOTTING
 // ================================================================================
 
@@ -96,6 +153,39 @@ fill(bbMiddlePlot, bbLowerPlot, color=color.new(color.green, 95), title="BB Lowe
 plotshape(buySignal, title="Buy Signal", location=location.belowbar, color=buySignalColor, style=shape.triangleup, size=size.normal, text="BUY")
 plotshape(sellSignal, title="Sell Signal", location=location.abovebar, color=sellSignalColor, style=shape.triangledown, size=size.normal, text="SELL")
 
+// Plot Risk Management Levels for Buy Signals
+plot(showRiskLevels and not na(buyEntryPrice) ? buyEntryPrice : na, "Buy Entry", color=color.new(color.blue, 0), linewidth=2, style=plot.style_linebr)
+plot(showRiskLevels and not na(buyStopLoss) ? buyStopLoss : na, "Buy Stop Loss", color=color.new(color.red, 0), linewidth=2, style=plot.style_linebr)
+plot(showRiskLevels and not na(buyTP1) ? buyTP1 : na, "Buy TP1", color=color.new(color.green, 50), linewidth=1, style=plot.style_linebr)
+plot(showRiskLevels and not na(buyTP2) ? buyTP2 : na, "Buy TP2", color=color.new(color.green, 30), linewidth=1, style=plot.style_linebr)
+plot(showRiskLevels and not na(buyTP3) ? buyTP3 : na, "Buy TP3", color=color.new(color.green, 0), linewidth=1, style=plot.style_linebr)
+
+// Plot Risk Management Levels for Sell Signals
+plot(showRiskLevels and not na(sellEntryPrice) ? sellEntryPrice : na, "Sell Entry", color=color.new(color.orange, 0), linewidth=2, style=plot.style_linebr)
+plot(showRiskLevels and not na(sellStopLoss) ? sellStopLoss : na, "Sell Stop Loss", color=color.new(color.red, 0), linewidth=2, style=plot.style_linebr)
+plot(showRiskLevels and not na(sellTP1) ? sellTP1 : na, "Sell TP1", color=color.new(color.green, 50), linewidth=1, style=plot.style_linebr)
+plot(showRiskLevels and not na(sellTP2) ? sellTP2 : na, "Sell TP2", color=color.new(color.green, 30), linewidth=1, style=plot.style_linebr)
+plot(showRiskLevels and not na(sellTP3) ? sellTP3 : na, "Sell TP3", color=color.new(color.green, 0), linewidth=1, style=plot.style_linebr)
+
+// Price Level Labels
+if showPriceLevels and buySignal
+    label.new(bar_index, low, 
+     text="📊 LONG\n💰 Entry: " + str.tostring(buyEntryPrice, format.mintick) + 
+     "\n🛑 SL: " + str.tostring(buyStopLoss, format.mintick) + 
+     "\n🎯 TP1: " + str.tostring(buyTP1, format.mintick) + " (RR: " + str.tostring(buyRR1, "#.##") + ")" +
+     "\n🎯 TP2: " + str.tostring(buyTP2, format.mintick) + " (RR: " + str.tostring(buyRR2, "#.##") + ")" +
+     "\n🎯 TP3: " + str.tostring(buyTP3, format.mintick) + " (RR: " + str.tostring(buyRR3, "#.##") + ")",
+     style=label.style_label_up, color=color.new(color.green, 20), textcolor=color.white, size=size.normal)
+
+if showPriceLevels and sellSignal
+    label.new(bar_index, high,
+     text="📊 SHORT\n💰 Entry: " + str.tostring(sellEntryPrice, format.mintick) + 
+     "\n🛑 SL: " + str.tostring(sellStopLoss, format.mintick) + 
+     "\n🎯 TP1: " + str.tostring(sellTP1, format.mintick) + " (RR: " + str.tostring(sellRR1, "#.##") + ")" +
+     "\n🎯 TP2: " + str.tostring(sellTP2, format.mintick) + " (RR: " + str.tostring(sellRR2, "#.##") + ")" +
+     "\n🎯 TP3: " + str.tostring(sellTP3, format.mintick) + " (RR: " + str.tostring(sellRR3, "#.##") + ")",
+     style=label.style_label_down, color=color.new(color.red, 20), textcolor=color.white, size=size.normal)
+
 // Background Color Highlighting
 bgColor = showBackgroundColor ? (buySignal ? color.new(color.green, 90) : sellSignal ? color.new(color.red, 90) : na) : na
 bgcolor(bgColor, title="Signal Background")
@@ -104,38 +194,46 @@ bgcolor(bgColor, title="Signal Background")
 // ALERTS
 // ================================================================================
 
-// Alert Conditions
-alertcondition(buySignal, title="Buy Signal Alert", message="🟢 BUY SIGNAL: RSI crossed above {{rsiOversold}}, EMA bullish crossover, price touched lower BB, volume above average. Time: {{time}}, Price: {{close}}")
-alertcondition(sellSignal, title="Sell Signal Alert", message="🔴 SELL SIGNAL: RSI crossed below {{rsiOverbought}}, EMA bearish crossover, price touched upper BB, volume above average. Time: {{time}}, Price: {{close}}")
+// Alert Conditions with Price Levels
+alertcondition(buySignal, title="Buy Signal Alert", 
+ message="🟢 LONG SİNYALİ\n📈 Giriş Fiyatı: {{close}}\n🛑 Stop Loss: " + str.tostring(buyStopLoss) + 
+ "\n🎯 TP1: " + str.tostring(buyTP1) + "\n🎯 TP2: " + str.tostring(buyTP2) + "\n🎯 TP3: " + str.tostring(buyTP3))
 
-// Combined alert for any signal
-alertcondition(buySignal or sellSignal, title="Any Signal Alert", message="⚠️ TRADING SIGNAL DETECTED - Check chart for details. Time: {{time}}, Price: {{close}}")
+alertcondition(sellSignal, title="Sell Signal Alert",
+ message="🔴 SHORT SİNYALİ\n📉 Giriş Fiyatı: {{close}}\n🛑 Stop Loss: " + str.tostring(sellStopLoss) + 
+ "\n🎯 TP1: " + str.tostring(sellTP1) + "\n🎯 TP2: " + str.tostring(sellTP2) + "\n🎯 TP3: " + str.tostring(sellTP3))
+
+alertcondition(buySignal or sellSignal, title="Any Signal Alert", message="⚠️ TİCARET SİNYALİ - Grafik kontrol edin!")
 
 // ================================================================================
-// INFORMATION TABLE (Optional - displays current indicator values)
+// INFORMATION TABLE
 // ================================================================================
 
-// Create info table in top right corner
-var table infoTable = table.new(position.top_right, 2, 6, bgcolor=color.new(color.black, 85), border_width=1, border_color=color.gray)
+var table infoTable = table.new(position.top_right, 2, 7, bgcolor=color.new(color.black, 85), border_width=1, border_color=color.gray)
 
-if barstate.islast
-    table.cell(infoTable, 0, 0, "Indicator", text_color=color.white, text_size=size.small)
-    table.cell(infoTable, 1, 0, "Value", text_color=color.white, text_size=size.small)
+if barstate.islast and showTradeInfo
+    table.cell(infoTable, 0, 0, "Gösterge", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 0, "Değer", text_color=color.white, text_size=size.small)
     
     table.cell(infoTable, 0, 1, "RSI", text_color=color.white, text_size=size.small)
     table.cell(infoTable, 1, 1, str.tostring(rsiValue, "#.##"), text_color=rsiValue > rsiOverbought ? color.red : rsiValue < rsiOversold ? color.green : color.white, text_size=size.small)
     
-    table.cell(infoTable, 0, 2, "Fast EMA", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 0, 2, "Hızlı EMA", text_color=color.white, text_size=size.small)
     table.cell(infoTable, 1, 2, str.tostring(emaFast, "#.##"), text_color=emaFastColor, text_size=size.small)
     
-    table.cell(infoTable, 0, 3, "Slow EMA", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 0, 3, "Yavaş EMA", text_color=color.white, text_size=size.small)
     table.cell(infoTable, 1, 3, str.tostring(emaSlow, "#.##"), text_color=emaSlowColor, text_size=size.small)
     
-    table.cell(infoTable, 0, 4, "Volume vs MA", text_color=color.white, text_size=size.small)
-    table.cell(infoTable, 1, 4, volumeAboveAverage ? "Above ✓" : "Below ✗", text_color=volumeAboveAverage ? color.green : color.red, text_size=size.small)
+    table.cell(infoTable, 0, 4, "Hacim", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 4, volumeAboveAverage ? "Yüksek ✓" : "Düşük ✗", text_color=volumeAboveAverage ? color.green : color.red, text_size=size.small)
     
     table.cell(infoTable, 0, 5, "Trend", text_color=color.white, text_size=size.small)
-    table.cell(infoTable, 1, 5, emaFast > emaSlow ? "Bullish ↑" : "Bearish ↓", text_color=emaFast > emaSlow ? color.green : color.red, text_size=size.small)
+    table.cell(infoTable, 1, 5, emaFast > emaSlow ? "Yükseliş ↑" : "Düşüş ↓", text_color=emaFast > emaSlow ? color.green : color.red, text_size=size.small)
+    
+    table.cell(infoTable, 0, 6, "BB Pozisyon", text_color=color.white, text_size=size.small)
+    bbPosition = close > bbUpper ? "Üst Bant" : close < bbLower ? "Alt Bant" : "Orta"
+    bbPosColor = close > bbUpper ? color.red : close < bbLower ? color.green : color.gray
+    table.cell(infoTable, 1, 6, bbPosition, text_color=bbPosColor, text_size=size.small)
 
 // ================================================================================
 // END OF INDICATOR
